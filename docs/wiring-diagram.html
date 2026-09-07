@@ -1,0 +1,859 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seismograph Wiring</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --bg:#EDF0F3;
+  --surface:#FFFFFF;
+  --surface-2:#F5F7F9;
+  --ink:#111820;
+  --ink-2:#2C3742;
+  --muted:#5B6772;
+  --hair:#D2D9E1;
+  --hair-2:#E4E9EE;
+  --accent:#A96A05;
+  --accent-bg:#F7EAD1;
+  --danger:#A8281F;
+  --danger-bg:#F7DFDC;
+  --ok:#1B7A49;
+
+  --w-3v3:#D4342A;
+  --w-gnd:#4E5A66;
+  --w-sda:#B87E06;
+  --w-scl:#1B8A50;
+  --w-pot:#6845CE;
+  --w-btn:#1668C0;
+  --w-led:#BE3585;
+
+  --f-disp:"IBM Plex Sans Condensed","Helvetica Neue",Arial,sans-serif;
+  --f-body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1319;
+    --surface:#161D26;
+    --surface-2:#1A222C;
+    --ink:#DFE6EE;
+    --ink-2:#C3CDD8;
+    --muted:#94A1B0;
+    --hair:#28323D;
+    --hair-2:#202932;
+    --accent:#E8B23A;
+    --accent-bg:#33280F;
+    --danger:#F08C82;
+    --danger-bg:#3A1A17;
+    --ok:#4FC98B;
+
+    --w-3v3:#F2665C;
+    --w-gnd:#93A1B1;
+    --w-sda:#EDBB48;
+    --w-scl:#4ACB8B;
+    --w-pot:#A98BFA;
+    --w-btn:#63AAF2;
+    --w-led:#F075BE;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1319;
+  --surface:#161D26;
+  --surface-2:#1A222C;
+  --ink:#DFE6EE;
+  --ink-2:#C3CDD8;
+  --muted:#94A1B0;
+  --hair:#28323D;
+  --hair-2:#202932;
+  --accent:#E8B23A;
+  --accent-bg:#33280F;
+  --danger:#F08C82;
+  --danger-bg:#3A1A17;
+  --ok:#4FC98B;
+
+  --w-3v3:#F2665C;
+  --w-gnd:#93A1B1;
+  --w-sda:#EDBB48;
+  --w-scl:#4ACB8B;
+  --w-pot:#A98BFA;
+  --w-btn:#63AAF2;
+  --w-led:#F075BE;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--f-body);
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:56px 28px 96px}
+
+/* ---------- type ---------- */
+.eyebrow{
+  font-family:var(--f-mono);
+  font-size:11px;font-weight:600;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent);
+}
+h1{
+  font-family:var(--f-disp);
+  font-weight:700;
+  font-size:clamp(38px,6vw,56px);
+  line-height:1.02;
+  letter-spacing:-.012em;
+  margin:12px 0 0;
+  text-wrap:balance;
+}
+h2{
+  font-family:var(--f-disp);
+  font-weight:600;
+  font-size:26px;
+  line-height:1.15;
+  letter-spacing:-.006em;
+  margin:0;
+  text-wrap:balance;
+}
+h3{
+  font-family:var(--f-disp);
+  font-weight:600;
+  font-size:16px;
+  letter-spacing:.005em;
+  margin:0 0 6px;
+}
+p{margin:0 0 14px;max-width:66ch}
+p:last-child{margin-bottom:0}
+strong{font-weight:600;color:var(--ink)}
+code,.mono{font-family:var(--f-mono);font-size:.9em}
+code{
+  background:var(--surface-2);
+  border:1px solid var(--hair-2);
+  border-radius:4px;
+  padding:.08em .34em;
+}
+a{color:var(--accent)}
+
+/* ---------- header ---------- */
+header{border-bottom:2px solid var(--ink);padding-bottom:22px}
+.lede{font-size:17px;line-height:1.55;color:var(--ink-2);max-width:60ch;margin-top:16px}
+.meta{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1px;
+  background:var(--hair);
+  border:1px solid var(--hair);
+  margin-top:28px;
+}
+.meta div{background:var(--bg);padding:11px 14px}
+.meta dt{
+  font-family:var(--f-mono);font-size:10px;font-weight:500;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  margin:0 0 3px;
+}
+.meta dd{margin:0;font-family:var(--f-disp);font-weight:600;font-size:15px;font-variant-numeric:tabular-nums}
+
+/* ---------- sections ---------- */
+section{margin-top:64px}
+.sec-head{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.sec-head .eyebrow{flex:0 0 auto}
+.sec-intro{color:var(--muted);max-width:64ch;margin-bottom:22px}
+
+/* ---------- figures ---------- */
+figure{margin:0}
+.panel{
+  background:var(--surface);
+  border:1px solid var(--hair);
+  border-radius:10px;
+  padding:18px 18px 14px;
+}
+.scroll{overflow-x:auto}
+.scroll svg{display:block;width:100%;min-width:760px;height:auto}
+.mini svg{display:block;width:100%;height:auto}
+figcaption{
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+  margin-top:14px;
+  max-width:78ch;
+}
+
+/* svg shared */
+.wire{fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.w3{stroke:var(--w-3v3)} .d3{fill:var(--w-3v3)}
+.wg{stroke:var(--w-gnd)} .dg{fill:var(--w-gnd)}
+.wsda{stroke:var(--w-sda)}
+.wscl{stroke:var(--w-scl)}
+.wpot{stroke:var(--w-pot)}
+.wbtn{stroke:var(--w-btn)}
+.wled{stroke:var(--w-led)} .dled{fill:var(--w-led)}
+.rail{stroke-width:4.5}
+.bd{fill:var(--surface);stroke:var(--ink);stroke-width:1.6}
+.bd2{fill:var(--surface-2);stroke:var(--hair);stroke-width:1.2}
+.pad{fill:var(--muted)}
+.padx{fill:none;stroke:var(--hair);stroke-width:1.2}
+.tk{fill:var(--ink);font-family:var(--f-mono);font-size:11px;font-weight:500}
+.tks{fill:var(--muted);font-family:var(--f-mono);font-size:9.5px;font-weight:500;letter-spacing:.08em}
+.tn{fill:var(--ink);font-family:var(--f-disp);font-size:13px;font-weight:600}
+.tn-s{fill:var(--muted);font-family:var(--f-body);font-size:11px}
+.tacc{fill:var(--accent);font-family:var(--f-mono);font-size:10px;font-weight:600;letter-spacing:.1em}
+.thin{stroke:var(--hair);fill:none;stroke-width:1.2}
+.ink{stroke:var(--ink);fill:none;stroke-width:1.6}
+
+/* ---------- legend ---------- */
+.legend{
+  display:flex;flex-wrap:wrap;gap:8px 22px;
+  margin-top:16px;padding-top:14px;border-top:1px solid var(--hair-2);
+}
+.legend span{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:11px;letter-spacing:.04em;color:var(--muted)}
+.sw{width:22px;height:0;border-top-width:3px;border-top-style:solid;border-radius:2px}
+
+/* ---------- table ---------- */
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+th{
+  text-align:left;
+  font-family:var(--f-mono);font-size:10px;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  padding:0 14px 8px 0;border-bottom:1.5px solid var(--ink);
+}
+td{padding:11px 14px 11px 0;border-bottom:1px solid var(--hair-2);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.pin{font-family:var(--f-mono);font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+td.note{color:var(--muted);font-size:13.5px}
+.chip{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font-family:var(--f-mono);font-size:11.5px;color:var(--ink-2)}
+.chip i{width:15px;height:3px;border-radius:2px;display:block}
+
+/* ---------- gotchas ---------- */
+.gotchas{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:1px;
+  background:var(--hair);
+  border-top:1px solid var(--hair);
+  border-bottom:1px solid var(--hair);
+}
+.gotcha{background:var(--bg);padding:22px 20px}
+.gotcha .mini{margin-bottom:16px}
+.gotcha p{font-size:13.5px;line-height:1.55;color:var(--muted)}
+.gotcha p strong{color:var(--ink)}
+
+/* ---------- gpio band ---------- */
+.band{
+  display:grid;
+  grid-template-columns:repeat(10,minmax(0,1fr));
+  gap:4px;
+}
+@media(max-width:720px){.band{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.gp{
+  border:1px solid var(--hair);
+  border-radius:5px;
+  background:var(--surface);
+  padding:7px 4px 6px;
+  text-align:center;
+  min-height:56px;
+  display:flex;flex-direction:column;justify-content:center;gap:2px;
+}
+.gp b{font-family:var(--f-mono);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1}
+.gp s{
+  text-decoration:none;
+  font-family:var(--f-mono);font-size:9px;letter-spacing:.05em;
+  color:var(--muted);line-height:1.15;
+}
+.gp.u{background:var(--accent-bg);border-color:var(--accent)}
+.gp.u b{color:var(--accent)}
+.gp.u s{color:var(--accent)}
+.gp.warn{border-style:dashed}
+.gp.warn b{color:var(--ink-2)}
+.gp.no{background:var(--surface-2);border-color:var(--hair-2);opacity:.72}
+.gp.no b{color:var(--muted)}
+.band-key{
+  display:flex;flex-wrap:wrap;gap:10px 20px;margin-top:16px;
+  font-family:var(--f-mono);font-size:11px;color:var(--muted);letter-spacing:.03em;
+}
+.band-key span{display:inline-flex;align-items:center;gap:7px}
+.kbox{width:14px;height:14px;border-radius:4px;border:1px solid var(--hair);background:var(--surface)}
+.kbox.u{background:var(--accent-bg);border-color:var(--accent)}
+.kbox.warn{border-style:dashed}
+.kbox.no{background:var(--surface-2);border-color:var(--hair-2)}
+.band-note{margin-top:14px;font-size:13.5px;color:var(--muted);max-width:70ch}
+
+/* ---------- callout ---------- */
+.callout{
+  border-left:3px solid var(--danger);
+  background:var(--danger-bg);
+  padding:16px 18px;
+  border-radius:0 8px 8px 0;
+  margin-top:24px;
+}
+.callout h3{color:var(--danger)}
+.callout p{font-size:14px;color:var(--ink-2)}
+
+/* ---------- two-up ---------- */
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:28px;align-items:start}
+.mount-figs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.mount-figs figcaption{margin-top:8px;font-size:12px}
+
+footer{
+  margin-top:72px;padding-top:20px;border-top:1px solid var(--hair);
+  font-family:var(--f-mono);font-size:11px;letter-spacing:.05em;color:var(--muted);
+  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+}
+@media (prefers-reduced-motion:no-preference){
+  a{transition:opacity .15s ease}
+}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">ESP32 Seismograph · Build Sheet</div>
+  <h1>Seismograph Wiring</h1>
+  <p class="lede">Five jumpers, one breadboard. An MPU6050 on I²C, a pot for full-scale deflection, a button to print, and an LED that lights when the trace clips — then the ESP32 talks to the thermal printer over Bluetooth, with no wire between them at all.</p>
+
+  <dl class="meta">
+    <div><dt>Board</dt><dd>ESP32-WROOM-32</dd></div>
+    <div><dt>Sensor</dt><dd>MPU6050 · ±2 g</dd></div>
+    <div><dt>Sample rate</dt><dd>200 Hz</dd></div>
+    <div><dt>I²C address</dt><dd>0x68</dd></div>
+    <div><dt>Printer link</dt><dd>Bluetooth SPP</dd></div>
+  </dl>
+</header>
+
+<!-- ============ CONTEXT ============ -->
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">Signal path</span>
+    <h2>Where the wiring sits</h2>
+  </div>
+  <p class="sec-intro">Only one leg of this chain is wired. Everything downstream of the ESP32 is radio, which is why the printer never shares a ground with the board.</p>
+
+  <figure class="panel">
+    <div class="scroll">
+      <svg viewBox="0 0 1000 210" role="img" aria-label="Desk vibration reaches the MPU6050, which feeds the ESP32 over I2C; the ESP32 sends the seismogram to the NT-1809 printer over Bluetooth SPP and serves a live view over its own Wi-Fi access point.">
+        <defs>
+          <marker id="ah-ctx" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+        <g style="color:var(--muted)">
+          <line class="wire" x1="176" y1="105" x2="232" y2="105" stroke="currentColor" stroke-width="1.8" marker-end="url(#ah-ctx)"/>
+          <line class="wire" x1="376" y1="105" x2="432" y2="105" stroke="currentColor" stroke-width="1.8" marker-end="url(#ah-ctx)"/>
+          <path class="wire" d="M596,86 H660 V56 H732" stroke="currentColor" stroke-width="1.8" marker-end="url(#ah-ctx)"/>
+          <path class="wire" d="M596,124 H660 V156 H732" stroke="currentColor" stroke-width="1.8" marker-end="url(#ah-ctx)"/>
+        </g>
+
+        <!-- source -->
+        <rect class="bd2" x="40" y="80" width="136" height="50" rx="6"/>
+        <path class="thin" d="M56,118 q10,-14 20,0 t20,0 t20,0 t20,0" stroke="var(--muted)"/>
+        <text class="tn" x="108" y="103" text-anchor="middle">Desk / floor</text>
+
+        <text class="tks" x="204" y="98" text-anchor="middle">SHAKE</text>
+
+        <!-- mpu -->
+        <rect class="bd" x="232" y="76" width="144" height="58" rx="6"/>
+        <text class="tn" x="304" y="100" text-anchor="middle">MPU6050</text>
+        <text class="tn-s" x="304" y="118" text-anchor="middle">±2 g accelerometer</text>
+
+        <text class="tks" x="404" y="98" text-anchor="middle">I²C</text>
+        <text class="tks" x="404" y="112" text-anchor="middle">400 kHz</text>
+
+        <!-- esp32 -->
+        <rect class="bd" x="432" y="60" width="164" height="90" rx="6"/>
+        <text class="tn" x="514" y="90" text-anchor="middle">ESP32-WROOM-32</text>
+        <text class="tn-s" x="514" y="110" text-anchor="middle">0.5 Hz high-pass</text>
+        <text class="tn-s" x="514" y="126" text-anchor="middle">30 s ring buffer</text>
+
+        <text class="tks" x="666" y="46" text-anchor="start">BLUETOOTH SPP</text>
+        <text class="tks" x="666" y="182" text-anchor="start">WI-FI AP · SEISMO</text>
+
+        <!-- printer -->
+        <rect class="bd" x="732" y="26" width="208" height="60" rx="6"/>
+        <rect class="bd2" x="748" y="40" width="60" height="32" rx="3"/>
+        <text class="tn" x="822" y="52" text-anchor="start">Netum NT-1809</text>
+        <text class="tn-s" x="822" y="70" text-anchor="start">58 mm · 384 dots</text>
+
+        <!-- phone -->
+        <rect class="bd" x="732" y="126" width="208" height="60" rx="6"/>
+        <rect class="bd2" x="748" y="136" width="30" height="40" rx="4"/>
+        <text class="tn" x="792" y="152" text-anchor="start">Phone browser</text>
+        <text class="tn-s" x="792" y="170" text-anchor="start">live waveform view</text>
+      </svg>
+    </div>
+    <figcaption>The printer runs off its own battery and connects only over Bluetooth — nothing on it touches the breadboard.</figcaption>
+  </figure>
+</section>
+
+<!-- ============ MAIN WIRING ============ -->
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">The breadboard</span>
+    <h2>Every connection</h2>
+  </div>
+  <p class="sec-intro">Power comes off the board once, into a 3V3 rail and a GND rail; every part taps those rather than fighting for pins. Filled dots are joints. The little hump is one wire hopping another without touching it.</p>
+
+  <figure class="panel">
+    <div class="scroll">
+      <svg viewBox="0 0 1000 660" role="img" aria-label="Wiring diagram: a 3V3 rail across the top and a GND rail across the bottom. The ESP32 feeds both from its 3V3 and GND pins. On the left, a 10k potentiometer bridges the two rails with its wiper on GPIO34, an LED with a 330 ohm resistor runs from GPIO26 to the GND rail, and a pushbutton runs from GPIO27 to the GND rail. On the right, an MPU6050 takes 3V3 and GND from the rails, SCL to GPIO22, SDA to GPIO21, and AD0 to the GND rail.">
+
+        <!-- ============ RAILS ============ -->
+        <text class="tks" x="60" y="36">3V3 RAIL</text>
+        <line class="wire rail w3" x1="60" y1="54" x2="950" y2="54"/>
+        <text class="tks" x="60" y="624">GND RAIL</text>
+        <line class="wire rail wg" x1="60" y1="596" x2="950" y2="596"/>
+
+        <!-- ============ ESP32 BOARD ============ -->
+        <rect class="bd" x="400" y="120" width="200" height="400" rx="8"/>
+        <!-- rf shield -->
+        <rect class="bd2" x="428" y="150" width="144" height="70" rx="3"/>
+        <line class="thin" x1="428" y1="164" x2="572" y2="164"/>
+        <line class="thin" x1="428" y1="206" x2="572" y2="206"/>
+        <text class="tk" x="500" y="190" text-anchor="middle">WROOM-32</text>
+        <!-- name -->
+        <text class="tn" x="500" y="470" text-anchor="middle">ESP32 DevKit</text>
+        <text class="tn-s" x="500" y="488" text-anchor="middle">pin order varies — read the silkscreen</text>
+        <!-- usb -->
+        <rect class="bd2" x="490" y="520" width="60" height="16" rx="2"/>
+        <text class="tks" x="520" y="554" text-anchor="middle">USB 5V</text>
+
+        <!-- top 3V3 pin -->
+        <rect class="pad" x="433" y="108" width="14" height="12" rx="2"/>
+        <text class="tk" x="440" y="100" text-anchor="middle">3V3</text>
+        <line class="wire w3" x1="440" y1="108" x2="440" y2="54"/>
+        <circle class="d3" cx="440" cy="54" r="4.5"/>
+
+        <!-- bottom GND pin -->
+        <rect class="pad" x="433" y="520" width="14" height="12" rx="2"/>
+        <text class="tk" x="440" y="554" text-anchor="middle">GND</text>
+        <line class="wire wg" x1="440" y1="532" x2="440" y2="596"/>
+        <circle class="dg" cx="440" cy="596" r="4.5"/>
+
+        <!-- left pins -->
+        <rect class="pad" x="386" y="244" width="14" height="12" rx="2"/>
+        <text class="tk" x="412" y="254">GPIO34</text>
+        <rect class="pad" x="386" y="344" width="14" height="12" rx="2"/>
+        <text class="tk" x="412" y="354">GPIO26</text>
+        <rect class="pad" x="386" y="434" width="14" height="12" rx="2"/>
+        <text class="tk" x="412" y="444">GPIO27</text>
+
+        <!-- right pins -->
+        <rect class="pad" x="600" y="266" width="14" height="12" rx="2"/>
+        <text class="tk" x="588" y="276" text-anchor="end">GPIO22</text>
+        <rect class="pad" x="600" y="292" width="14" height="12" rx="2"/>
+        <text class="tk" x="588" y="302" text-anchor="end">GPIO21</text>
+
+        <!-- ============ POTENTIOMETER ============ -->
+        <rect class="bd" x="150" y="210" width="140" height="80" rx="6"/>
+        <circle class="bd2" cx="220" cy="250" r="26"/>
+        <line class="ink" x1="220" y1="250" x2="238" y2="234"/>
+        <text class="tn" x="220" y="312" text-anchor="middle">10 kΩ pot</text>
+        <text class="tn-s" x="220" y="330" text-anchor="middle">full-scale: 5 – 500 mg</text>
+        <!-- terminal 1 -> 3V3 -->
+        <line class="wire w3" x1="180" y1="210" x2="180" y2="54"/>
+        <circle class="d3" cx="180" cy="54" r="4.5"/>
+        <text class="tks" x="188" y="196">END 1</text>
+        <!-- terminal 3 -> GND -->
+        <polyline class="wire wg" points="150,250 100,250 100,596"/>
+        <circle class="dg" cx="100" cy="596" r="4.5"/>
+        <text class="tks" x="108" y="240">END 3</text>
+        <!-- wiper -> GPIO34 -->
+        <line class="wire wpot" x1="290" y1="250" x2="386" y2="250"/>
+        <text class="tks" x="338" y="240" text-anchor="middle">WIPER</text>
+
+        <!-- ============ LED + RESISTOR ============ -->
+        <line class="wire wled" x1="386" y1="350" x2="346" y2="350"/>
+        <rect class="bd" x="286" y="340" width="60" height="20" rx="2"/>
+        <text class="tks" x="316" y="332" text-anchor="middle">330 Ω</text>
+        <line class="wire wled" x1="286" y1="350" x2="250" y2="350"/>
+        <polygon points="250,337 250,363 225,350" fill="var(--w-led)" stroke="var(--w-led)" stroke-width="1.5" stroke-linejoin="round"/>
+        <line class="wire wled" x1="225" y1="335" x2="225" y2="365"/>
+        <g style="color:var(--w-led)">
+          <line x1="238" y1="330" x2="248" y2="318" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          <line x1="228" y1="326" x2="238" y2="314" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          <polygon points="248,318 243,319 247,323" fill="currentColor"/>
+          <polygon points="238,314 233,315 237,319" fill="currentColor"/>
+        </g>
+        <polyline class="wire wled" points="225,350 160,350 160,596"/>
+        <circle class="dled" cx="160" cy="596" r="4.5"/>
+        <text class="tn" x="230" y="392" text-anchor="middle">LED</text>
+        <text class="tks" x="188" y="366" text-anchor="middle">CATHODE</text>
+
+        <!-- ============ BUTTON ============ -->
+        <rect class="bd" x="250" y="408" width="80" height="64" rx="4"/>
+        <circle class="bd2" cx="290" cy="440" r="14"/>
+        <line class="wire wbtn" x1="330" y1="440" x2="386" y2="440"/>
+        <polyline class="wire wg" points="250,440 205,440 205,596"/>
+        <circle class="dg" cx="205" cy="596" r="4.5"/>
+        <text class="tn" x="290" y="494" text-anchor="middle">Button</text>
+        <text class="tn-s" x="290" y="512" text-anchor="middle">INPUT_PULLUP · no resistor</text>
+
+        <!-- ============ MPU6050 ============ -->
+        <rect class="bd" x="720" y="196" width="180" height="232" rx="6"/>
+        <rect class="bd2" x="812" y="252" width="56" height="56" rx="3"/>
+        <circle class="pad" cx="820" cy="260" r="2.5"/>
+        <text class="tk" x="840" y="277" text-anchor="middle">MPU</text>
+        <text class="tk" x="840" y="293" text-anchor="middle">6050</text>
+        <text class="tks" x="840" y="330" text-anchor="middle">Z ⊙ UP</text>
+        <text class="tn" x="886" y="410" text-anchor="end">GY-521 module</text>
+
+        <!-- module pads -->
+        <rect class="pad" x="706" y="214" width="14" height="12" rx="2"/>
+        <text class="tk" x="740" y="224">VCC</text>
+        <rect class="pad" x="706" y="240" width="14" height="12" rx="2"/>
+        <text class="tk" x="740" y="250">GND</text>
+        <rect class="pad" x="706" y="266" width="14" height="12" rx="2"/>
+        <text class="tk" x="740" y="276">SCL</text>
+        <rect class="pad" x="706" y="292" width="14" height="12" rx="2"/>
+        <text class="tk" x="740" y="302">SDA</text>
+        <rect class="padx" x="706" y="318" width="14" height="12" rx="2"/>
+        <text class="tks" x="740" y="328">XDA</text>
+        <rect class="padx" x="706" y="344" width="14" height="12" rx="2"/>
+        <text class="tks" x="740" y="354">XCL</text>
+        <rect class="pad" x="706" y="370" width="14" height="12" rx="2"/>
+        <text class="tk" x="740" y="380">AD0</text>
+        <rect class="padx" x="706" y="396" width="14" height="12" rx="2"/>
+        <text class="tks" x="740" y="406">INT</text>
+        <text class="tks" x="790" y="328">not used</text>
+        <text class="tks" x="790" y="354">not used</text>
+        <text class="tks" x="790" y="406">not used</text>
+
+        <!-- VCC -> 3V3 rail -->
+        <polyline class="wire w3" points="706,220 686,220 686,54"/>
+        <circle class="d3" cx="686" cy="54" r="4.5"/>
+        <!-- GND -> hop over VCC -> down right side -->
+        <path class="wire wg" d="M706,246 H666 V170 H676 Q686,152 696,170 H935 V596"/>
+        <circle class="dg" cx="935" cy="596" r="4.5"/>
+        <!-- SCL / SDA -->
+        <line class="wire wscl" x1="706" y1="272" x2="614" y2="272"/>
+        <line class="wire wsda" x1="706" y1="298" x2="614" y2="298"/>
+        <!-- AD0 -> GND -->
+        <polyline class="wire wg" points="706,376 650,376 650,596"/>
+        <circle class="dg" cx="650" cy="596" r="4.5"/>
+        <text class="tks" x="644" y="396" text-anchor="end">ADDR 0x68</text>
+      </svg>
+    </div>
+
+    <div class="legend">
+      <span><i class="sw" style="border-top-color:var(--w-3v3)"></i>3V3</span>
+      <span><i class="sw" style="border-top-color:var(--w-gnd)"></i>GND</span>
+      <span><i class="sw" style="border-top-color:var(--w-sda)"></i>SDA</span>
+      <span><i class="sw" style="border-top-color:var(--w-scl)"></i>SCL</span>
+      <span><i class="sw" style="border-top-color:var(--w-pot)"></i>POT WIPER</span>
+      <span><i class="sw" style="border-top-color:var(--w-btn)"></i>BUTTON</span>
+      <span><i class="sw" style="border-top-color:var(--w-led)"></i>LED</span>
+    </div>
+
+    <figcaption>Colours match the jumpers worth grabbing off the reel — red for 3V3, black for anything landing on the GND rail. The two rails are the only things carrying more than one connection, so if something behaves oddly, they are the first place to reseat.</figcaption>
+  </figure>
+</section>
+
+<!-- ============ TABLE ============ -->
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">Reference</span>
+    <h2>Connection list</h2>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr><th>From</th><th>To</th><th>Wire</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>MPU6050 VCC</td><td class="pin">3V3</td>
+          <td><span class="chip"><i style="background:var(--w-3v3)"></i>red</span></td>
+          <td class="note">The GY-521 has an onboard regulator, so 5V works too.</td>
+        </tr>
+        <tr>
+          <td>MPU6050 GND</td><td class="pin">GND</td>
+          <td><span class="chip"><i style="background:var(--w-gnd)"></i>black</span></td>
+          <td class="note"></td>
+        </tr>
+        <tr>
+          <td>MPU6050 SDA</td><td class="pin">GPIO21</td>
+          <td><span class="chip"><i style="background:var(--w-sda)"></i>yellow</span></td>
+          <td class="note">I²C at 400 kHz.</td>
+        </tr>
+        <tr>
+          <td>MPU6050 SCL</td><td class="pin">GPIO22</td>
+          <td><span class="chip"><i style="background:var(--w-scl)"></i>green</span></td>
+          <td class="note"></td>
+        </tr>
+        <tr>
+          <td>MPU6050 AD0</td><td class="pin">GND</td>
+          <td><span class="chip"><i style="background:var(--w-gnd)"></i>black</span></td>
+          <td class="note">Sets address <code>0x68</code>. Most breakouts already pull this low.</td>
+        </tr>
+        <tr>
+          <td>Pot end 1</td><td class="pin">3V3</td>
+          <td><span class="chip"><i style="background:var(--w-3v3)"></i>red</span></td>
+          <td class="note">Swap ends 1 and 3 if the knob runs backwards.</td>
+        </tr>
+        <tr>
+          <td>Pot end 3</td><td class="pin">GND</td>
+          <td><span class="chip"><i style="background:var(--w-gnd)"></i>black</span></td>
+          <td class="note"></td>
+        </tr>
+        <tr>
+          <td>Pot wiper</td><td class="pin">GPIO34</td>
+          <td><span class="chip"><i style="background:var(--w-pot)"></i>violet</span></td>
+          <td class="note">Middle terminal. Sets full-scale deflection, 5–500 mg, log-mapped.</td>
+        </tr>
+        <tr>
+          <td>Button leg A</td><td class="pin">GPIO27</td>
+          <td><span class="chip"><i style="background:var(--w-btn)"></i>blue</span></td>
+          <td class="note">Tap to print, hold 1 s to re-arm the trigger.</td>
+        </tr>
+        <tr>
+          <td>Button leg B</td><td class="pin">GND</td>
+          <td><span class="chip"><i style="background:var(--w-gnd)"></i>black</span></td>
+          <td class="note"><code>INPUT_PULLUP</code>, so no external resistor.</td>
+        </tr>
+        <tr>
+          <td>LED anode → 330 Ω</td><td class="pin">GPIO26</td>
+          <td><span class="chip"><i style="background:var(--w-led)"></i>any</span></td>
+          <td class="note">Lights above 50% of full scale.</td>
+        </tr>
+        <tr>
+          <td>LED cathode</td><td class="pin">GND</td>
+          <td><span class="chip"><i style="background:var(--w-gnd)"></i>black</span></td>
+          <td class="note">Short leg, flat edge.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ GOTCHAS ============ -->
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">Details</span>
+    <h2>The three parts that get wired wrong</h2>
+  </div>
+  <p class="sec-intro">Each of these boots fine, compiles fine, and misbehaves in a way that looks like a firmware bug.</p>
+
+  <div class="gotchas">
+
+    <div class="gotcha">
+      <figure class="mini">
+        <svg viewBox="0 0 300 180" role="img" aria-label="The potentiometer wired as a divider: end 1 to 3V3, end 3 to GND, wiper to GPIO34. Leaving end 3 unconnected leaves the input floating.">
+          <defs>
+            <marker id="ah-pot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--w-pot)"/>
+            </marker>
+          </defs>
+          <text class="tks" x="90" y="22" text-anchor="middle">3V3</text>
+          <line class="wire w3" x1="40" y1="30" x2="140" y2="30"/>
+          <line class="wire w3" x1="90" y1="30" x2="90" y2="62"/>
+          <rect class="bd" x="66" y="62" width="48" height="58" rx="3"/>
+          <line class="wire wg" x1="90" y1="120" x2="90" y2="152"/>
+          <line class="wire wg" x1="40" y1="152" x2="140" y2="152"/>
+          <text class="tks" x="90" y="172" text-anchor="middle">GND</text>
+          <line class="wire wpot" x1="176" y1="91" x2="118" y2="91" marker-end="url(#ah-pot)"/>
+          <text class="tk" x="186" y="86">GPIO34</text>
+          <text class="tks" x="186" y="102">ADC1</text>
+          <text class="tks" x="126" y="52">END 1</text>
+          <text class="tks" x="126" y="140">END 3</text>
+        </svg>
+      </figure>
+      <h3>The pot needs all three legs</h3>
+      <p>A potentiometer only reads as a position when it is a <strong>divider</strong> — 3V3 at one end, GND at the other, wiper in the middle. Wire just the wiper and one end and GPIO34 is a floating input behind a resistor: it has no internal pull-down, so it drifts with whatever your hand is near.</p>
+    </div>
+
+    <div class="gotcha">
+      <figure class="mini">
+        <svg viewBox="0 0 300 180" role="img" aria-label="LED polarity: the long leg is the anode and takes the resistor from GPIO26; the short leg beside the flat edge of the rim is the cathode and goes to ground.">
+          <path class="ink" d="M108,96 a44,44 0 0 1 84,0 z" fill="var(--surface)"/>
+          <line class="ink" x1="108" y1="96" x2="192" y2="96"/>
+          <line class="ink" x1="108" y1="96" x2="108" y2="80"/>
+          <text class="tks" x="96" y="72" text-anchor="end">FLAT</text>
+          <text class="tks" x="96" y="86" text-anchor="end">EDGE</text>
+          <!-- legs -->
+          <line class="wire wg" x1="126" y1="96" x2="126" y2="146"/>
+          <line class="wire wled" x1="172" y1="96" x2="172" y2="122"/>
+          <text class="tks" x="126" y="164" text-anchor="middle">SHORT</text>
+          <text class="tks" x="182" y="140" text-anchor="start">LONG</text>
+          <line class="wire wg" x1="126" y1="146" x2="60" y2="146"/>
+          <text class="tks" x="54" y="150" text-anchor="end">GND</text>
+          <line class="wire wled" x1="172" y1="122" x2="212" y2="122"/>
+          <rect class="bd" x="212" y="112" width="34" height="20" rx="2"/>
+          <text class="tks" x="229" y="104" text-anchor="middle">330 Ω</text>
+          <line class="wire wled" x1="246" y1="122" x2="272" y2="122"/>
+          <text class="tks" x="272" y="140" text-anchor="end">GPIO26</text>
+        </svg>
+      </figure>
+      <h3>LED polarity is silent</h3>
+      <p>The <strong>short leg on the flat side of the rim is the cathode</strong>, and it goes to ground. Backwards, the LED never lights and nothing else changes — the firmware still thinks it is driving a trigger indicator, so you end up debugging the threshold instead of the leg.</p>
+    </div>
+
+    <div class="gotcha">
+      <figure class="mini">
+        <svg viewBox="0 0 300 180" role="img" aria-label="A four-pin tact switch: the pins on each side are permanently joined inside, so the button must be wired across the body, straddling the breadboard's centre channel.">
+          <rect class="bd" x="96" y="52" width="108" height="76" rx="4"/>
+          <circle class="bd2" cx="150" cy="90" r="19"/>
+          <!-- internal pairs -->
+          <line class="wire wg" x1="96" y1="70" x2="66" y2="70"/>
+          <line class="wire wg" x1="96" y1="110" x2="66" y2="110"/>
+          <path class="wire wg" d="M78,70 V110" stroke-dasharray="4 4"/>
+          <line class="wire wbtn" x1="204" y1="70" x2="234" y2="70"/>
+          <line class="wire wbtn" x1="204" y1="110" x2="234" y2="110"/>
+          <path class="wire wbtn" d="M222,70 V110" stroke-dasharray="4 4"/>
+          <text class="tks" x="60" y="62" text-anchor="end">GND</text>
+          <text class="tks" x="240" y="62" text-anchor="start">GPIO27</text>
+          <text class="tks" x="150" y="150" text-anchor="middle">DASHED = ALREADY JOINED INSIDE</text>
+          <line class="thin" x1="150" y1="30" x2="150" y2="46" stroke-dasharray="3 3"/>
+          <text class="tks" x="150" y="24" text-anchor="middle">CENTRE CHANNEL</text>
+        </svg>
+      </figure>
+      <h3>Wire the button across, not along</h3>
+      <p>Two of a tact switch's four pins are <strong>permanently joined inside the body</strong>. Land both jumpers on one joined pair and GPIO27 sits at ground forever — the firmware reads a button held down since boot and prints on its own. Straddle the breadboard's centre channel and the geometry sorts itself out.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ GPIO BAND ============ -->
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">Constraints</span>
+    <h2>Which pins you may move things to</h2>
+  </div>
+  <p class="sec-intro">Tidying the breadboard by shifting a wire one row over is how this build breaks. Here is the whole map before you do.</p>
+
+  <div class="band">
+    <div class="gp warn"><b>0</b><s>strap</s></div>
+    <div class="gp warn"><b>1</b><s>TX0</s></div>
+    <div class="gp warn"><b>2</b><s>strap</s></div>
+    <div class="gp warn"><b>3</b><s>RX0</s></div>
+    <div class="gp"><b>4</b><s>A2</s></div>
+    <div class="gp warn"><b>5</b><s>strap</s></div>
+    <div class="gp no"><b>6</b><s>flash</s></div>
+    <div class="gp no"><b>7</b><s>flash</s></div>
+    <div class="gp no"><b>8</b><s>flash</s></div>
+    <div class="gp no"><b>9</b><s>flash</s></div>
+
+    <div class="gp no"><b>10</b><s>flash</s></div>
+    <div class="gp no"><b>11</b><s>flash</s></div>
+    <div class="gp warn"><b>12</b><s>strap · A2</s></div>
+    <div class="gp"><b>13</b><s>A2</s></div>
+    <div class="gp"><b>14</b><s>A2</s></div>
+    <div class="gp warn"><b>15</b><s>strap · A2</s></div>
+    <div class="gp"><b>16</b><s>free</s></div>
+    <div class="gp"><b>17</b><s>free</s></div>
+    <div class="gp"><b>18</b><s>free</s></div>
+    <div class="gp"><b>19</b><s>free</s></div>
+
+    <div class="gp no"><b>20</b><s>—</s></div>
+    <div class="gp u"><b>21</b><s>SDA</s></div>
+    <div class="gp u"><b>22</b><s>SCL</s></div>
+    <div class="gp"><b>23</b><s>free</s></div>
+    <div class="gp no"><b>24</b><s>—</s></div>
+    <div class="gp"><b>25</b><s>A2</s></div>
+    <div class="gp u"><b>26</b><s>LED</s></div>
+    <div class="gp u"><b>27</b><s>BUTTON</s></div>
+    <div class="gp no"><b>28</b><s>—</s></div>
+    <div class="gp no"><b>29</b><s>—</s></div>
+
+    <div class="gp no"><b>30</b><s>—</s></div>
+    <div class="gp no"><b>31</b><s>—</s></div>
+    <div class="gp"><b>32</b><s>A1</s></div>
+    <div class="gp"><b>33</b><s>A1</s></div>
+    <div class="gp u"><b>34</b><s>POT · A1 in</s></div>
+    <div class="gp"><b>35</b><s>A1 · in</s></div>
+    <div class="gp"><b>36</b><s>A1 · in</s></div>
+    <div class="gp no"><b>37</b><s>—</s></div>
+    <div class="gp no"><b>38</b><s>—</s></div>
+    <div class="gp"><b>39</b><s>A1 · in</s></div>
+  </div>
+
+  <div class="band-key">
+    <span><i class="kbox u"></i>used by this build</span>
+    <span><i class="kbox"></i>free</span>
+    <span><i class="kbox warn"></i>strapping or serial — avoid</span>
+    <span><i class="kbox no"></i>flash, or not present on WROOM-32</span>
+  </div>
+  <p class="band-note"><strong>A1</strong> = ADC1, analog that keeps working with Wi-Fi up. <strong>A2</strong> = ADC2. <strong>in</strong> = input-only, no internal pull-up — right for a pot, useless for the button.</p>
+
+  <div class="callout">
+    <h3>The pot must stay on GPIO32–39</h3>
+    <p>ADC2 — GPIO0, 2, 4, 12–15, 25–27 — stops working the moment the Wi-Fi driver starts, and it fails <em>silently</em>, returning garbage rather than an error. Moving the pot to GPIO25 to tidy up the breadboard would look completely fine and read nonsense. GPIO34 is also input-only with no internal pull-up, which is exactly right for a pot and exactly wrong for the button.</p>
+  </div>
+</section>
+
+<!-- ============ MOUNTING ============ -->
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">Placement</span>
+    <h2>Mounting and power</h2>
+  </div>
+
+  <div class="two">
+    <div class="mount-figs">
+      <figure class="mini">
+        <svg viewBox="0 0 260 190" role="img" aria-label="Correct mounting: the module taped flat against the desk with its Z axis pointing up.">
+          <line class="ink" x1="20" y1="150" x2="240" y2="150"/>
+          <g style="color:var(--muted)">
+            <line x1="26" y1="150" x2="16" y2="164" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="56" y1="150" x2="46" y2="164" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="86" y1="150" x2="76" y2="164" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="116" y1="150" x2="106" y2="164" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="146" y1="150" x2="136" y2="164" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="176" y1="150" x2="166" y2="164" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="206" y1="150" x2="196" y2="164" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="236" y1="150" x2="226" y2="164" stroke="currentColor" stroke-width="1.2"/>
+          </g>
+          <rect class="bd" x="86" y="130" width="88" height="20" rx="2"/>
+          <rect x="80" y="126" width="16" height="28" rx="2" fill="var(--accent-bg)" stroke="var(--accent)" stroke-width="1.2"/>
+          <rect x="164" y="126" width="16" height="28" rx="2" fill="var(--accent-bg)" stroke="var(--accent)" stroke-width="1.2"/>
+          <text class="tacc" x="130" y="180" text-anchor="middle">TAPED FLAT</text>
+          <g style="color:var(--ink)">
+            <line x1="130" y1="130" x2="130" y2="66" stroke="currentColor" stroke-width="1.6"/>
+            <polygon points="130,58 124,72 136,72" fill="currentColor"/>
+            <text class="tk" x="140" y="66">Z</text>
+            <line x1="130" y1="130" x2="196" y2="112" stroke="currentColor" stroke-width="1.2"/>
+            <polygon points="204,110 191,105 194,117" fill="currentColor"/>
+            <text class="tk" x="206" y="102">X</text>
+          </g>
+          <text class="tks" x="130" y="42" text-anchor="middle">Z IS THE TRACE</text>
+        </svg>
+        <figcaption>Rigid: measures the desk.</figcaption>
+      </figure>
+
+      <figure class="mini">
+        <svg viewBox="0 0 260 190" role="img" aria-label="Wrong mounting: the module dangling on its jumper wires, free to swing.">
+          <line class="ink" x1="20" y1="40" x2="240" y2="40"/>
+          <path class="wire wg" d="M120,40 C104,72 148,86 128,116" stroke-width="2"/>
+          <path class="wire w3" d="M136,40 C154,74 116,88 140,116" stroke-width="2"/>
+          <rect x="96" y="116" width="76" height="22" rx="2" fill="var(--surface)" stroke="var(--danger)" stroke-width="1.6"/>
+          <g style="color:var(--danger)">
+            <path d="M78,116 q-12,11 0,22" fill="none" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M66,110 q-18,17 0,34" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".6"/>
+            <path d="M190,116 q12,11 0,22" fill="none" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M202,110 q18,17 0,34" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".6"/>
+          </g>
+          <text class="tks" x="130" y="170" text-anchor="middle" style="fill:var(--danger)">FREE TO SWING</text>
+        </svg>
+        <figcaption>Dangling: measures the jumper wires.</figcaption>
+      </figure>
+    </div>
+
+    <div>
+      <h3>Couple it to the thing you are measuring</h3>
+      <p>Tape or hot-glue the MPU6050 flat against the desk or floor. A module hanging on its jumpers measures the resonance of the jumpers — a much larger and much less interesting signal than the one you want.</p>
+      <p>Orientation matters: the module's <strong>Z axis is the seismogram trace</strong>, so mount it flat with Z pointing up. X and Y only feed the horizontal-peak stat printed in the header.</p>
+      <h3 style="margin-top:24px">Power</h3>
+      <p>USB into the ESP32 is fine — the whole circuit draws a few tens of milliamps. The printer runs off its own internal battery and never draws from the board; the only thing between them is Bluetooth.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>Pins mirror src/config.h</span>
+  <span>ESP32-WROOM-32 · MPU6050 · Netum NT-1809</span>
+</footer>
+
+</div>

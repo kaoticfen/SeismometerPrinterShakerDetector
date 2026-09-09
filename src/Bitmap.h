@@ -10,14 +10,26 @@
 //
 // The whole graph is rendered into one buffer rather than streamed row by row
 // because the second labels are 7 rows tall and would otherwise straddle a
-// chunk boundary. At 30s and 20 rows/s that is 600 rows -- 28.8KB, held static
-// so it never competes with the radios for heap.
+// chunk boundary. At 30s and 20 rows/s that is 600 rows -- 28.8KB.
+//
+// That buffer is heap-allocated for the duration of a print rather than held
+// static, and the ESP32 has only just enough DRAM for that to matter: with the
+// WiFi AP and Bluedroid both up there is ~23KB of heap left, and opening an
+// RFCOMM channel needs more than that. Bluedroid does not fail such an
+// allocation cleanly either -- it asserts in vQueueDelete on its own cleanup
+// path. Both print paths open the link before calling begin(), so the image is
+// allocated only once the connection is established and the stack has taken
+// what it needs.
 namespace Bitmap {
 
 constexpr int MAX_ROWS = WINDOW_SECONDS * PRINT_ROWS_PER_SEC;  // 600
 
-// Clears the image and sets its height. Rows beyond `rows` are not printed.
-void begin(int rows);
+// Allocates and clears the image. Returns false if the heap could not provide
+// it, in which case nothing else here draws anything. Call end() when done.
+bool begin(int rows);
+
+// Releases the image. Safe to call when nothing is allocated.
+void end();
 
 int rows();
 const uint8_t* data();

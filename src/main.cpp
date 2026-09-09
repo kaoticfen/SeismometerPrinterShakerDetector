@@ -158,8 +158,19 @@ void setup() {
   }
   Sensor::startTask();
 
-  WebUI::begin(requestPrintFromWeb);
+  // Order matters. Bluedroid takes a large slice of internal DRAM once, at
+  // init, and cannot fall back to PSRAM or recover if the allocation fails --
+  // it memsets the NULL straight into a StoreProhibited panic inside
+  // bta_sys_init. The WiFi AP is the more forgiving of the two, so let the
+  // Bluetooth stack take its memory first.
+  Serial.printf("[boot] heap before radios: %u (largest block %u)\n",
+                (unsigned)ESP.getFreeHeap(), (unsigned)ESP.getMaxAllocHeap());
   BtLink::begin();
+  Serial.printf("[boot] heap after BT: %u (largest block %u)\n",
+                (unsigned)ESP.getFreeHeap(), (unsigned)ESP.getMaxAllocHeap());
+  WebUI::begin(requestPrintFromWeb);
+  Serial.printf("[boot] heap after WiFi: %u (largest block %u)\n",
+                (unsigned)ESP.getFreeHeap(), (unsigned)ESP.getMaxAllocHeap());
 
   Serial.printf("[boot] ready. AP \"%s\", link %s\n", AP_SSID,
                 BtLink::statusText());
@@ -209,12 +220,16 @@ void loop() {
   static uint32_t lastLog = 0;
   if (millis() - lastLog > 5000) {
     lastLog = millis();
+    // btn is the raw pin level: HIGH is released (INPUT_PULLUP), LOW is held.
+    // A pin that reads LOW with nobody touching it latches the long-press and
+    // then no further button event can ever fire.
     Serial.printf("[stat] %us buffered, %.1f mg fs, link=%s, clients=%d, "
-                  "heap=%u, errs=%lu\n",
+                  "heap=%u, errs=%lu, btn=%s\n",
                   Sensor::available() / SAMPLE_RATE_HZ, g_fullScaleMg,
                   BtLink::connected() ? "up" : "down", WebUI::clientCount(),
                   (unsigned)ESP.getFreeHeap(),
-                  (unsigned long)Sensor::errorCount());
+                  (unsigned long)Sensor::errorCount(),
+                  digitalRead(PIN_BUTTON) == LOW ? "LOW/held" : "HIGH/released");
   }
 
   delay(2);

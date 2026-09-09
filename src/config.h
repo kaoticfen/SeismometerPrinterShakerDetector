@@ -76,12 +76,23 @@ static const float LED_TRIGGER_FRACTION = 0.5f;
 #define PRINTER_USE_BLE 0
 #endif
 
-static const uint8_t PRINTER_MAC[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+static const uint8_t PRINTER_MAC[6] = {0x5A, 0x4A, 0x47, 0x20, 0x8B, 0xC1};
 
 // `const` after the star matters: a non-const pointer is a mutable variable, so
 // every translation unit that includes this and doesn't use it warns.
-static const char* const PRINTER_NAME  = "NT-1809";
+// Only used as a fallback when PRINTER_MAC is unset. The unit sells as an
+// NT-1809 but reports no name at all over Classic discovery and advertises as
+// "BlueTooth Printer" over BLE, so match what it actually broadcasts.
+static const char* const PRINTER_NAME  = "BlueTooth Printer";
 static const char* const BT_LOCAL_NAME = "SEISMO";
+
+// RFCOMM channel on the printer. Connecting to a known channel skips SDP
+// service discovery, which is the step that fails (ESP_SPP_DISCOVERY_COMP_EVT
+// status 2) once the WiFi AP is sharing the radio: inquiry and SDP get very
+// little airtime under coexistence, while a direct RFCOMM connect is one short
+// exchange. Virtually every ESC/POS unit answers on channel 1. Set to 0 to
+// discover the channel over SDP instead.
+static const int PRINTER_SPP_CHANNEL = 1;
 
 // ---------------------------------------------------------------------------
 // WiFi access point for the live web view

@@ -8,6 +8,7 @@
 #include <NimBLEDevice.h>
 #else
 #include <BluetoothSerial.h>
+#include <esp_bt.h>
 #endif
 
 namespace BtLink {
@@ -149,7 +150,52 @@ BluetoothSerial g_serial;
 constexpr size_t SPP_CHUNK = 256;
 }  // namespace
 
+// Bring the controller up Classic-only, having first handed back the BLE half.
+//
+// Arduino builds the controller dual-mode (BTDM), so btStart() reserves BLE
+// controller memory this firmware never touches -- and there is not enough
+// internal DRAM to carry that dead weight alongside the WiFi AP. esp_wifi_init
+// then fails with ESP_ERR_NO_MEM and the AP never comes up.
+//
+// esp_bt_controller_mem_release() only works before the controller is
+// initialised, and once the BLE memory is gone the controller can no longer be
+// enabled in BTDM mode -- which is exactly what btStart() would ask for. So do
+// the init here instead: BluetoothSerial::begin() finds the controller already
+// ENABLED and skips its own start.
+bool startControllerClassicOnly() {
+  if (esp_bt_controller_get_status() != ESP_BT_CONTROLLER_STATUS_IDLE) {
+    return true;  // already up, nothing to reclaim
+  }
+
+  esp_err_t err = esp_bt_controller_mem_release(ESP_BT_MODE_BLE);
+  if (err != ESP_OK) {
+    // Not fatal on its own -- the controller still starts, just fatter.
+    log_w("BLE mem release failed: %s", esp_err_to_name(err));
+  }
+
+  esp_bt_controller_config_t cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
+  cfg.mode = ESP_BT_MODE_CLASSIC_BT;
+  err = esp_bt_controller_init(&cfg);
+  if (err != ESP_OK) {
+    snprintf(g_status, sizeof(g_status), "ctrl init: %s", esp_err_to_name(err));
+    return false;
+  }
+  while (esp_bt_controller_get_status() == ESP_BT_CONTROLLER_STATUS_IDLE) {
+    vTaskDelay(1);
+  }
+
+  err = esp_bt_controller_enable(ESP_BT_MODE_CLASSIC_BT);
+  if (err != ESP_OK) {
+    snprintf(g_status, sizeof(g_status), "ctrl enable: %s",
+             esp_err_to_name(err));
+    return false;
+  }
+  return true;
+}
+
 bool begin() {
+  if (!startControllerClassicOnly()) return false;
+
   // true = master role, so we initiate to the printer rather than waiting.
   if (!g_serial.begin(BT_LOCAL_NAME, true)) {
     snprintf(g_status, sizeof(g_status), "SPP begin failed");
@@ -170,7 +216,13 @@ bool connect() {
     ok = g_serial.connect(String(PRINTER_NAME));
   } else {
     snprintf(g_status, sizeof(g_status), "SPP connecting by MAC");
-    ok = g_serial.connect(const_cast<uint8_t*>(PRINTER_MAC));
+    ok = g_serial.connect(const_cast<uint8_t*>(PRINTER_MAC),
+                          PRINTER_SPP_CHANNEL);
+    if (!ok && PRINTER_SPP_CHANNEL != 0) {
+      // Wrong guess at the channel, or the printer really does want to be
+      // asked. Fall back to SDP discovery before giving up on this attempt.
+      ok = g_serial.connect(const_cast<uint8_t*>(PRINTER_MAC), 0);
+    }
   }
 
   snprintf(g_status, sizeof(g_status), ok ? "SPP connected" : "SPP connect failed");

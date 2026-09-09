@@ -1,11 +1,12 @@
 #include "Bitmap.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 namespace Bitmap {
 namespace {
 
-uint8_t g_img[MAX_ROWS * PRINT_WIDTH_BYTES];
+uint8_t* g_img = nullptr;
 int g_rows = 0;
 
 // 5x7 font, column-major: each byte is one column, bit 0 is the top row.
@@ -45,11 +46,22 @@ const Glyph* findGlyph(char c) {
 
 }  // namespace
 
-void begin(int rows) {
+bool begin(int rows) {
+  end();
   if (rows < 0) rows = 0;
   if (rows > MAX_ROWS) rows = MAX_ROWS;
+  if (rows == 0) return true;
+
+  g_img = (uint8_t*)calloc((size_t)rows, PRINT_WIDTH_BYTES);
+  if (!g_img) return false;
   g_rows = rows;
-  memset(g_img, 0, (size_t)rows * PRINT_WIDTH_BYTES);
+  return true;
+}
+
+void end() {
+  free(g_img);
+  g_img = nullptr;
+  g_rows = 0;
 }
 
 int rows() { return g_rows; }
@@ -57,6 +69,7 @@ const uint8_t* data() { return g_img; }
 size_t sizeBytes() { return (size_t)g_rows * PRINT_WIDTH_BYTES; }
 
 void setPixel(int x, int y) {
+  if (!g_img) return;
   if (x < 0 || x >= PRINT_WIDTH_DOTS || y < 0 || y >= g_rows) return;
   // MSB-first within the byte: dot 0 is bit 7 of byte 0.
   g_img[(size_t)y * PRINT_WIDTH_BYTES + (x >> 3)] |= (uint8_t)(0x80 >> (x & 7));

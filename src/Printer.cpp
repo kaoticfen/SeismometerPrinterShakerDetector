@@ -122,10 +122,16 @@ bool printSeismogram(const Bin* bins, int nBins, int32_t fullScaleCounts,
   hr();
 
   // Graph. One printed row per bin.
-  Bitmap::begin(nBins);
+  if (!Bitmap::begin(nBins)) {
+    textln("(out of memory for graph)");
+    feed(3);
+    return false;
+  }
   Bitmap::drawGrid(nBins, PRINT_ROWS_PER_SEC);
   Bitmap::drawTrace(bins, nBins, fullScaleCounts);
-  if (!printBitmap()) return false;
+  const bool imageOk = printBitmap();
+  Bitmap::end();
+  if (!imageOk) return false;
 
   hr();
   snprintf(line, sizeof(line), "peak     %.1f mg", stats.peakMg);
@@ -166,14 +172,20 @@ bool printTestPage() {
   // mean the chunk pacing needs to be slower (raise RASTER_CHUNK_PAD_MS);
   // a grey or patchy fill means the heat settings need raising.
   const int rows = 120;
-  Bitmap::begin(rows);
+  if (!Bitmap::begin(rows)) {
+    textln("(out of memory for raster)");
+    feed(3);
+    return false;
+  }
   Bitmap::drawGrid(rows, PRINT_ROWS_PER_SEC);
   const int halfWidth = (GRAPH_RIGHT - GRAPH_LEFT) / 2;
   for (int y = 0; y < rows; y++) {
     const int w = halfWidth * y / rows;
     Bitmap::hSpan(y, GRAPH_CENTER - w, GRAPH_CENTER + w);
   }
-  if (!printBitmap()) return false;
+  const bool imageOk = printBitmap();
+  Bitmap::end();
+  if (!imageOk) return false;
 
   hr();
   textln("width  384 dots / 48 bytes");
